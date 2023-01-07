@@ -31,7 +31,7 @@ export default function Footer() {
           </p>
 
           <p className="text-2xl text-gray-400 font-medium">
-            © 2022, All Rights Reserved.
+            © 2023, All Rights Reserved.
           </p>
         </div>
 
