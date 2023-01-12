@@ -22,39 +22,39 @@ router.get("/logout", (req, res, next) => {
 });
 
 //github auth
-router.get("/github", passport.authenticate("github", { scope: ["user"] }));
+router.get("/github", passport.authenticate("github", { scope: ["user"] }))
 
 router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/auth/login/failed" }),
   function (req, res) {
     // Successful authentication, redirect home.
-    res.redirect(process.env.FRONTEND_ORIGIN);
+    res.redirect(process.env.FRONTEND_ORIGIN)
   }
-);
+)
 
 //google auth
-router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
+router.get("/google", passport.authenticate("google", { scope: ["profile"] }))
 
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/auth/login/failed" }),
   function (req, res) {
     // Successful authentication, redirect home.
-    res.redirect(process.env.FRONTEND_ORIGIN);
+    res.redirect(process.env.FRONTEND_ORIGIN)
   }
-);
+)
 
 //twitter auth
-router.get("/twitter", passport.authenticate("twitter"));
+router.get("/twitter", passport.authenticate("twitter"))
 
 router.get(
   "/twitter/callback",
   passport.authenticate("twitter", { failureRedirect: "/auth/login/failed" }),
   function (req, res) {
     // Successful authentication, redirect home.
-    res.redirect(process.env.FRONTEND_ORIGIN);
+    res.redirect(process.env.FRONTEND_ORIGIN)
   }
-);
+)
 
-export default router;
+export default router
