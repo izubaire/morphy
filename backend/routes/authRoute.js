@@ -1,25 +1,25 @@
-import express from "express";
-import passport from "passport";
+import express from "express"
+import passport from "passport"
 
-const router = express.Router();
+const router = express.Router()
 
 router.get("/login/failed", (req, res) => {
-  res.status(401);
-  throw new Error("Failed to authenticate");
-});
+  res.status(401)
+  throw new Error("Failed to authenticate")
+})
 
 router.get("/login/success", (req, res) => {
-  res.send(req.user);
-});
+  res.send(req.user)
+})
 
 router.get("/logout", (req, res, next) => {
   if (req.user) {
     req.logout(function (err) {
-      if (err) return next(err);
-      res.redirect(process.env.FRONTEND_ORIGIN);
-    });
+      if (err) return next(err)
+      res.redirect(process.env.FRONTEND_ORIGIN)
+    })
   }
-});
+})
 
 //github auth
 router.get("/github", passport.authenticate("github", { scope: ["user"] }))
