@@ -18,10 +18,10 @@ passport.serializeUser(function (user, done) {
   done(null, user._id)
 })
 
-passport.deserializeUser(function (id, done) {
-  UserModel.findById(id, (err, doc) => {
+passport.deserializeUser(async function (id, done) {
+  UserModel.findById(id, (err, user) => {
     if (err) return done(err, null)
-    return done(null, doc)
+    return done(null, user)
   })
 })
 
@@ -112,9 +112,3 @@ passport.use(
   })
 )
 
-//api-key: CgUW72NvzJ7QfZednNZVdep02
-//api-secret: yq0gY2dGo1QyTDKQSuKsnsg64twrqgFwTSlqdt25LJ4msKLXcR
-//bearer: AAAAAAAAAAAAAAAAAAAAAJ%2ByfQEAAAAAI6h2V2Xnjlp5vsGqLwgP%2F6fWbHM%3DSKXMpC77kszrrRHquUS510kTDjCinusqfzNtxsvTckZGSvpTe6
-
-//XeYqf65bAqMSzVpdJEMaiemoV
-//C4OXHM4BdIYjdoJFbzl5lgHErQbzMoNcukO01PDvE7Jy3mfLyZ
