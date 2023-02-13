@@ -1,11 +1,16 @@
+import { MongoMessage } from "../../utils/types"
 import Comment from "./Comment"
 
-export default function Comments() {
+interface Props {
+  messages: MongoMessage[]
+}
+
+export default function Comments({ messages }: Props) {
   return (
     <div>
-      <Comment />
-      <Comment />
-      <Comment />
+      {messages.map((m) => (
+        <Comment key={m._id} comment={m} />
+      ))}
     </div>
   )
 }

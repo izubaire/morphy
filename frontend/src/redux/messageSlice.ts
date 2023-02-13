@@ -5,13 +5,19 @@ import { MessageData, MongoMessage, UpdateMessage } from "../utils/types"
 interface State {
   messages: MongoMessage[] | []
   messageLoading: boolean
+  messageSuccess: boolean
+  messageError: boolean
   messageMsg: string
+  messageAction: "ROOT" | "DELETE" | "EDIT" | "REPLY" | ""
 }
 
 const initialState: State = {
   messages: [],
   messageLoading: false,
+  messageSuccess: false,
+  messageError: false,
   messageMsg: "",
+  messageAction: "",
 }
 
 //get all messages
@@ -33,6 +39,23 @@ export const getMessages = createAsyncThunk(
 //create a message
 export const createMessage = createAsyncThunk(
   "messageSlice/new",
+  async (messageData: MessageData, thunkApi: any) => {
+    try {
+      const userId = thunkApi.getState().user.user._id
+      return await messageService.newMessage(`/message/${userId}`, messageData)
+    } catch (err: any) {
+      const message =
+        (err.response && err.response.data && err.response.data.message) ||
+        err.message ||
+        err.toString()
+      return thunkApi.rejectWithValue(message)
+    }
+  }
+)
+
+//reply message
+export const replyMessage = createAsyncThunk(
+  "messageSlice/reply",
   async (messageData: MessageData, thunkApi: any) => {
     try {
       const userId = thunkApi.getState().user.user._id
@@ -92,7 +115,10 @@ const messageSlice = createSlice({
   reducers: {
     resetState: (state) => {
       state.messageLoading = false
+      state.messageSuccess = false
+      state.messageError = false
       state.messageMsg = ""
+      state.messageAction = ""
     },
   },
   extraReducers: (builder) => {
@@ -105,25 +131,52 @@ const messageSlice = createSlice({
       )
       .addCase(createMessage.pending, (state) => {
         state.messageLoading = true
+        state.messageAction = "ROOT"
       })
       .addCase(
         createMessage.fulfilled,
         (state, action: PayloadAction<MongoMessage>) => {
           state.messageLoading = false
+          state.messageSuccess = true
+          state.messageAction = "ROOT"
           state.messages = [action.payload, ...state.messages]
         }
       )
       .addCase(createMessage.rejected, (state, action: PayloadAction<any>) => {
         state.messageLoading = false
+        state.messageError = true
+        state.messageAction = "ROOT"
+        state.messageMsg = action.payload
+      })
+      .addCase(replyMessage.pending, (state) => {
+        state.messageLoading = true
+        state.messageAction = "REPLY"
+      })
+      .addCase(
+        replyMessage.fulfilled,
+        (state, action: PayloadAction<MongoMessage>) => {
+          state.messageLoading = false
+          state.messageSuccess = true
+          state.messageAction = "REPLY"
+          state.messages = [action.payload, ...state.messages]
+        }
+      )
+      .addCase(replyMessage.rejected, (state, action: PayloadAction<any>) => {
+        state.messageLoading = false
+        state.messageError = true
+        state.messageAction = "REPLY"
         state.messageMsg = action.payload
       })
       .addCase(editMessage.pending, (state) => {
         state.messageLoading = true
+        state.messageAction = "EDIT"
       })
       .addCase(
         editMessage.fulfilled,
         (state, action: PayloadAction<MongoMessage>) => {
           state.messageLoading = false
+          state.messageSuccess = true
+          state.messageAction = "EDIT"
           state.messages = state.messages.map((m) => {
             if (m._id === action.payload._id) return action.payload
             return m
@@ -132,15 +185,20 @@ const messageSlice = createSlice({
       )
       .addCase(editMessage.rejected, (state, action: PayloadAction<any>) => {
         state.messageLoading = false
+        state.messageError = true
+        state.messageAction = "EDIT"
         state.messageMsg = action.payload
       })
       .addCase(removeMessage.pending, (state) => {
         state.messageLoading = false
+        state.messageAction = "DELETE"
       })
       .addCase(
         removeMessage.fulfilled,
         (state, action: PayloadAction<string>) => {
           state.messageLoading = false
+          state.messageSuccess = true
+          state.messageAction = "DELETE"
           state.messages = state.messages.filter(
             (m) => m._id !== action.payload
           )
@@ -148,9 +206,12 @@ const messageSlice = createSlice({
       )
       .addCase(removeMessage.rejected, (state, action: PayloadAction<any>) => {
         state.messageLoading = false
+        state.messageError = true
+        state.messageAction = "DELETE"
         state.messageMsg = action.payload
       })
   },
 })
 
+export const { resetState } = messageSlice.actions
 export default messageSlice.reducer
