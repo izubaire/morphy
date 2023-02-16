@@ -4,20 +4,27 @@ import { IoMdClose } from "react-icons/io"
 import { MdDelete, MdEdit } from "react-icons/md"
 import { useDispatch, useSelector } from "react-redux"
 import { toast } from "react-toastify"
-import { removeMessage, resetState } from "../../redux/messageSlice"
+import {
+  removeMessage,
+  replyMessage,
+  resetState,
+} from "../../redux/messageSlice"
 import { AppDispatch, RootState } from "../../redux/store"
 import { MongoMessage } from "../../utils/types"
 import CommentForm from "./CommentForm"
+import Comments from "./Comments"
 import EditComment from "./EditComment"
 
 interface Props {
   comment: MongoMessage
+  replies: any
 }
 
-export default function Comment({ comment }: Props) {
+export default function Comment({ comment, replies }: Props) {
   const { user } = useSelector((state: RootState) => state.user)
   const [edit, setEdit] = useState<boolean>(false)
   const [reply, setReply] = useState<boolean>(false)
+  const [showReplies, setShowReplies] = useState<boolean>(false)
   const [message, setMessage] = useState<string>(comment.message)
   const dispatch = useDispatch<AppDispatch>()
   const {
@@ -29,10 +36,7 @@ export default function Comment({ comment }: Props) {
   } = useSelector((state: RootState) => state.message)
 
   useEffect(() => {
-    if (
-      messageAction &&
-      (messageAction === "EDIT" || messageAction === "DELETE")
-    ) {
+    if (messageAction === "EDIT" || messageAction === "DELETE") {
       if (messageSuccess) {
         dispatch(resetState())
         if (messageAction === "EDIT") {
@@ -43,6 +47,10 @@ export default function Comment({ comment }: Props) {
         dispatch(resetState())
         toast(messageMsg, { type: "error", autoClose: 2300 })
       }
+    }
+    if (messageAction === "REPLY") {
+      setReply(false)
+      setShowReplies(true)
     }
   }, [messageAction, messageSuccess, messageError, messageMsg, dispatch])
 
@@ -56,7 +64,7 @@ export default function Comment({ comment }: Props) {
 
   return (
     <>
-      <div className="mt-8 py-8 px-12 rounded-xl bg-[#f3f3f3]">
+      <div className="mt-6 py-8 px-12 rounded-xl bg-[#f3f3f3]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img
@@ -75,12 +83,21 @@ export default function Comment({ comment }: Props) {
             <p className="text-xl text-gray-400">1 month ago</p>
           </div>
           <div className="buttons flex items-center gap-5">
+            {replies[comment._id] && (
+              <button
+                onClick={() => setShowReplies((prev) => !prev)}
+                className="text-gray-500 text-xl bg-gray-200 rounded-full px-5 py-1.5 tracking-wide"
+              >
+                {showReplies ? "hide replies" : "show replies"}
+              </button>
+            )}
             {user && user._id === comment.senderId ? (
               <>
                 <button
                   onClick={deleteComment}
                   className={`${
-                    messageAction === "DELETE" && messageLoading
+                    (messageAction === "DELETE" || messageAction === "EDIT") &&
+                    messageLoading
                       ? "text-red-400 pointer-events-none"
                       : "text-red-600 hover:text-red-400"
                   } flex items-center gap-1.5 text-2xl font-semibold transition-all`}
@@ -125,6 +142,8 @@ export default function Comment({ comment }: Props) {
             message={message}
             setMessage={setMessage}
             comment={comment}
+            messageLoading={messageLoading}
+            messageAction={messageAction}
           />
         ) : (
           <div className="text-2xl text-gray-500 font-medium mt-6">
@@ -132,7 +151,22 @@ export default function Comment({ comment }: Props) {
           </div>
         )}
       </div>
-      {reply && <CommentForm user={user} actionType="REPLY" />}
+      {reply && (
+        <CommentForm
+          user={user}
+          actionType="REPLY"
+          actionFn={replyMessage}
+          parentId={comment._id}
+        />
+      )}
+      {replies[comment._id] && (
+        <Comments
+          messages={replies[comment._id]}
+          indentation
+          replies={replies}
+          showReplies={showReplies}
+        />
+      )}
     </>
   )
 }
