@@ -6,12 +6,14 @@ import { useDispatch, useSelector } from "react-redux"
 import { resetState } from "../../redux/messageSlice"
 import { AppDispatch, RootState } from "../../redux/store"
 import { toast } from "react-toastify"
+import { formatComment } from "../../utils/utilFunctions"
 
 interface Props {
   user: MongoUser | null
   actionType: string
   actionFn: any
   parentId?: string
+  initialValue?: string
 }
 
 export default function CommentForm({
@@ -19,6 +21,7 @@ export default function CommentForm({
   actionType,
   actionFn,
   parentId,
+  initialValue = "",
 }: Props) {
   const textareaRef = useRef<any>()
   const dispatch = useDispatch<AppDispatch>()
@@ -31,13 +34,18 @@ export default function CommentForm({
     messageSuccess,
     messageError,
     messageMsg,
+    currentMessageId,
   } = useSelector((state: RootState) => state.message)
 
   useEffect(() => {
     if (messageAction === actionType) {
       if (messageSuccess) {
         dispatch(resetState())
-        textareaRef.current.value = ""
+        if (
+          (messageAction === "REPLY" && parentId === currentMessageId) ||
+          messageAction === "ROOT"
+        )
+          textareaRef.current.value = ""
       }
       if (messageError) {
         toast(messageMsg, { type: "error", autoClose: 2300 })
@@ -50,6 +58,8 @@ export default function CommentForm({
     messageError,
     messageMsg,
     actionType,
+    currentMessageId,
+    parentId,
     dispatch,
   ])
 
@@ -58,7 +68,7 @@ export default function CommentForm({
     const comment = textareaRef.current.value
     if (!comment || !user || !article) return
     const messageData: MessageData = {
-      message: comment,
+      message: formatComment(comment, initialValue),
       senderId: user._id,
       articleId: article._id,
     }
@@ -75,6 +85,7 @@ export default function CommentForm({
       />
       <textarea
         ref={textareaRef}
+        defaultValue={initialValue}
         placeholder="Add a comment"
         className="w-full resize-none h-48 bg-white px-8 py-5 rounded-lg text-2xl text-gray-500 border border-gray-300 border-solid focus:border-gray-800 transition-all duration-200"
       ></textarea>
