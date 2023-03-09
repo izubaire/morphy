@@ -10,12 +10,13 @@ export default function Trending() {
   const { articles } = useSelector((state: RootState) => state.article)
 
   return (
-    <section className="trending px-6 pt-8 h-[57rem]">
+    <section className="trending xl:px-6 pt-8 h-[57rem]">
       <Swiper
         spaceBetween={20}
         slidesPerView={4}
         navigation={true}
         loop={true}
+        breakpoints={breakpoints}
         modules={[Navigation, Autoplay]}
         autoplay={{
           delay: 3700,
@@ -34,4 +35,19 @@ export default function Trending() {
       </Swiper>
     </section>
   )
+}
+
+const breakpoints = {
+  0: {
+    slidesPerView: 1,
+  },
+  640: {
+    slidesPerView: 2,
+  },
+  768: {
+    slidesPerView: 3,
+  },
+  1050: {
+    slidesPerView: 4,
+  },
 }
