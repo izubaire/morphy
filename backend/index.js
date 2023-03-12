@@ -20,8 +20,9 @@ const app = express()
 
 function connect() {
   try {
-    mongoose.connect(process.env.MONGO)
-    console.log("connected to mongodb")
+    mongoose.connect(process.env.MONGO, {
+      dbName: "database_name"
+    }).then(() => console.log("connected to mongodb"))
   } catch (error) {
     throw error
   }

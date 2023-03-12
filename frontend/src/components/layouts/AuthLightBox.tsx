@@ -34,13 +34,13 @@ export default function AuthLightBox({ closeAuth, setCloseAuth }: Props) {
     setCloseAuth(true)
   }
   function githubLogin() {
-    window.open(REACT_APP_BACKEND_URL+"/auth/github", "_self")
+    window.open(process.env.REACT_APP_BACKEND_URL+"/auth/github", "_self")
   }
   function googleLogin() {
-    window.open(REACT_APP_BACKEND_URL+"/auth/google", "_self")
+    window.open(process.env.REACT_APP_BACKEND_URL+"/auth/google", "_self")
   }
   function twitterLogin() {
-    window.open(REACT_APP_BACKEND_URL+"/auth/twitter", "_self")
+    window.open(process.env.REACT_APP_BACKEND_URL+"/auth/twitter", "_self")
   }
 
   return (
